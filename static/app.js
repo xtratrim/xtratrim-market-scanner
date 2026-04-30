@@ -207,8 +207,18 @@ function updateSessionPlaybook() {
   ].join("");
 }
 async function runScan() {
+  const activePanel = document.querySelector(".tab-panel.active")?.id || "stocksPanel";
+  if (activePanel === "premarketPanel") {
+    await runPremarketScan();
+    return;
+  }
+  if (activePanel === "cryptoPanel") {
+    await runCryptoScan();
+    return;
+  }
+
   const params = new URLSearchParams({
-    market: document.querySelector("#market").value,
+    market: "stocks",
     min_price: document.querySelector("#minPrice").value,
     max_price: document.querySelector("#maxPrice").value,
     min_change: document.querySelector("#minChange").value,
@@ -218,7 +228,7 @@ async function runScan() {
   });
 
   scanButton.disabled = true;
-  statusEl.textContent = "Scanning live market data...";
+  statusEl.textContent = "Scanning stocks only...";
   try {
     const payload = await fetchJson(`/api/scan?${params.toString()}`);
 
@@ -286,6 +296,12 @@ function activateTab(id) {
   document.querySelectorAll(".tab-panel").forEach((panel) => {
     panel.classList.toggle("active", panel.id === id);
   });
+  const market = document.querySelector("#market");
+  if (market && id === "stocksPanel") market.value = "stocks";
+  if (market && id === "cryptoPanel") market.value = "crypto";
+  if (id === "premarketPanel") scanButton.textContent = "Scan Pre-Market";
+  else if (id === "cryptoPanel") scanButton.textContent = "Scan Crypto";
+  else scanButton.textContent = "Scan Stocks";
 }
 
 document.querySelectorAll(".tab").forEach((tab) => {

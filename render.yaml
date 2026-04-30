@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: market-scanner
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py --host 0.0.0.0
+    envVars:
+      - key: SCANNER_PASSWORD
+        sync: false

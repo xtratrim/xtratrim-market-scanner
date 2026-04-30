@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Market Scanner</title>
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="toolbar">
+        <div>
+          <h1>Market Scanner</h1>
+          <p>Low-price stocks, pre-market explosions, top movers, meme coins, volume signals, and news context.</p>
+        </div>
+        <div class="actions">
+          <button id="scanButton" type="button">Scan Now</button>
+          <button id="premarketButton" type="button">Pre-Market</button>
+          <button id="cryptoButton" type="button">Crypto</button>
+        </div>
+      </section>
+
+      <nav class="tabs" aria-label="Scanner sections">
+        <button class="tab active" type="button" data-tab="stocksPanel">Stocks</button>
+        <button class="tab" type="button" data-tab="premarketPanel">Pre-Market</button>
+        <button class="tab" type="button" data-tab="cryptoPanel">Crypto / Meme Coins</button>
+        <button class="tab" type="button" data-tab="planPanel">Plan Lab</button>
+        <button class="tab" type="button" data-tab="sessionPanel">Session Playbook</button>
+      </nav>
+
+      <section class="filters" aria-label="Scanner filters">
+        <label>
+          Market
+          <select id="market">
+            <option value="all">Stocks + Crypto</option>
+            <option value="stocks">Stocks</option>
+            <option value="crypto">Crypto</option>
+          </select>
+        </label>
+        <label>
+          Min price
+          <input id="minPrice" type="number" min="0.001" step="0.001" value="0.001">
+        </label>
+        <label>
+          Max price
+          <input id="maxPrice" type="number" min="0.001" step="0.01" value="30">
+        </label>
+        <label>
+          Mover %
+          <input id="minChange" type="number" min="-100" step="0.1" value="10">
+        </label>
+        <label>
+          Pre Vol x
+          <input id="preVolumeRatio" type="number" min="0" step="0.1" value="1.5">
+        </label>
+        <label>
+          Results
+          <input id="limit" type="number" min="1" max="100" step="1" value="25">
+        </label>
+        <label>
+          Add symbols
+          <input id="symbols" type="text" value="AIXI" placeholder="AIXI, GME, SOFI">
+        </label>
+        <label class="check">
+          <input id="news" type="checkbox" checked>
+          News
+        </label>
+      </section>
+
+      <section class="status" id="status">Ready.</section>
+
+      <section class="grid tab-panel" id="premarketPanel">
+        <article>
+          <div class="section-title">
+            <h2>Pre-Market Exploders</h2>
+            <span>Gap % + early volume + news catalysts</span>
+          </div>
+          <div id="premarket" class="table"></div>
+        </article>
+      </section>
+
+      <section class="grid tab-panel active" id="stocksPanel">
+        <article>
+          <div class="section-title">
+            <h2>Top Movers</h2>
+            <span>Stocks up by your mover filter</span>
+          </div>
+          <div id="topMovers" class="table"></div>
+        </article>
+        <article>
+          <div class="section-title">
+            <h2>Watchlist Score</h2>
+            <span>Price range + volume + trend + news</span>
+          </div>
+          <div id="candidates" class="table"></div>
+        </article>
+      </section>
+
+      <section class="grid tab-panel" id="cryptoPanel">
+        <article>
+          <div class="section-title">
+            <h2>Meme Coin Movers</h2>
+            <span>24h gainers from CoinGecko meme-token data</span>
+          </div>
+          <div id="memeCoins" class="table"></div>
+        </article>
+      </section>
+
+      <section class="grid tab-panel" id="planPanel">
+        <article>
+          <div class="section-title">
+            <h2>Trade Plan Lab</h2>
+            <span>Position sizing, risk/reward, and discipline checks before entry</span>
+          </div>
+          <div class="plan-layout">
+            <section class="plan-card selected-setup">
+              <div class="mini-title">Selected setup</div>
+              <div id="selectedSetup" class="selected-empty">Run a scan, then choose Plan on any result.</div>
+            </section>
+
+            <section class="plan-card plan-inputs" aria-label="Trade plan controls">
+              <label>
+                Account size
+                <input id="accountSize" type="number" min="0" step="100" value="10000">
+              </label>
+              <label>
+                Risk per trade %
+                <input id="riskPct" type="number" min="0.1" max="10" step="0.1" value="1">
+              </label>
+              <label>
+                Entry
+                <input id="entryPrice" type="number" min="0" step="0.0001">
+              </label>
+              <label>
+                Stop
+                <input id="stopPrice" type="number" min="0" step="0.0001">
+              </label>
+              <label>
+                Target
+                <input id="targetPrice" type="number" min="0" step="0.0001">
+              </label>
+            </section>
+
+            <section class="plan-card">
+              <div class="mini-title">Risk plan</div>
+              <div id="planMetrics" class="metric-grid"></div>
+            </section>
+
+            <section class="plan-card">
+              <div class="mini-title">Entry checklist</div>
+              <div class="checklist">
+                <label class="plan-check"><input class="planRule" type="checkbox"> Clear catalyst or unusual volume</label>
+                <label class="plan-check"><input class="planRule" type="checkbox"> Spread/liquidity acceptable</label>
+                <label class="plan-check"><input class="planRule" type="checkbox"> Stop is set before entry</label>
+                <label class="plan-check"><input class="planRule" type="checkbox"> Target gives at least 2:1 reward/risk</label>
+                <label class="plan-check"><input class="planRule" type="checkbox"> No revenge trade or FOMO entry</label>
+              </div>
+              <div id="disciplineScore" class="discipline-score"></div>
+            </section>
+          </div>
+        </article>
+      </section>
+      <section class="grid tab-panel" id="sessionPanel">
+        <article>
+          <div class="section-title">
+            <h2>Session Playbook</h2>
+            <span>Simple rules for 4:00 AM pre-market and 9:30 AM open</span>
+          </div>
+          <div class="session-layout simple-session">
+            <section class="plan-card">
+              <div class="mini-title">4:00 AM pre-market</div>
+              <div class="session-rules">
+                <div class="rule-row"><strong>Scan</strong><span>Click Pre-Market. Keep Results around 10-20 and News on.</span></div>
+                <div class="rule-row"><strong>Only watch</strong><span>Gap up, unusual volume, real catalyst, and a spread you can exit.</span></div>
+                <div class="rule-row"><strong>Entry</strong><span>Wait for a pullback, reclaim, or clean hold. Do not buy the first spike.</span></div>
+                <div class="rule-row"><strong>Exit</strong><span>Use the Plan button, set target and stop, take the quick profit or leave.</span></div>
+              </div>
+            </section>
+
+            <section class="plan-card">
+              <div class="mini-title">9:30 AM open</div>
+              <div class="session-rules">
+                <div class="rule-row"><strong>Wait</strong><span>Let the first 5 minutes print. No instant chase at the bell.</span></div>
+                <div class="rule-row"><strong>Trigger</strong><span>Look for high-of-day reclaim or opening range break with volume.</span></div>
+                <div class="rule-row"><strong>Risk</strong><span>Stop goes under the setup before entry. Size from Plan Lab.</span></div>
+                <div class="rule-row"><strong>Stop trading</strong><span>After one planned win, one planned loss, or your max trades.</span></div>
+              </div>
+            </section>
+
+            <section class="plan-card session-controls">
+              <label>Profit target %<input id="sessionProfitPct" type="number" min="0.1" max="50" step="0.1" value="3"></label>
+              <label>Stop loss %<input id="sessionStopPct" type="number" min="0.1" max="50" step="0.1" value="1.5"></label>
+              <label>Max trades<input id="maxTrades" type="number" min="1" max="10" step="1" value="2"></label>
+              <label>Max daily loss %<input id="maxDailyLossPct" type="number" min="0.1" max="20" step="0.1" value="2"></label>
+            </section>
+
+            <section class="plan-card">
+              <div class="mini-title">Guardrails</div>
+              <div id="sessionMetrics" class="metric-grid"></div>
+              <div class="session-note">This keeps the system mechanical: quick target, predefined stop, limited attempts, and a daily cutoff.</div>
+            </section>
+          </div>
+        </article>
+      </section>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

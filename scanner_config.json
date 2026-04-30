@@ -1,0 +1,70 @@
+{
+  "stocks": {
+    "min_change_pct": 10,
+    "min_price": 0.001,
+    "max_price": 30,
+    "min_volume_usd": 20000000,
+    "premarket_min_volume_usd": 250000,
+    "history_period": "1mo",
+    "symbol_files": [
+      "penny_stock_universe.txt"
+    ],
+    "max_symbols": 350,
+    "symbols": [
+      "AMD",
+      "ASTS",
+      "AIXI",
+      "BB",
+      "BITF",
+      "BBAI",
+      "CHPT",
+      "COIN",
+      "F",
+      "GME",
+      "HOOD",
+      "IONQ",
+      "LCID",
+      "MARA",
+      "NIO",
+      "OPEN",
+      "PLTR",
+      "RBLX",
+      "RIOT",
+      "RIVN",
+      "SIRI",
+      "SNDL",
+      "SOFI",
+      "TLRY",
+      "WULF",
+      "WW"
+    ]
+  },
+  "crypto": {
+    "min_change_pct": 10,
+    "min_price": 0,
+    "max_price": 30,
+    "min_volume_usd": 1000000,
+    "use_coingecko_meme_category": true,
+    "coin_files": [
+      "meme_coin_universe.txt"
+    ],
+    "max_coins": 250,
+    "coingecko_ids": [
+      "dogecoin",
+      "shiba-inu",
+      "pepe",
+      "bonk",
+      "floki",
+      "dogwifcoin",
+      "book-of-meme",
+      "mog-coin",
+      "brett",
+      "popcat",
+      "cat-in-a-dogs-world",
+      "turbo",
+      "baby-doge-coin",
+      "memecoin-2",
+      "based-brett"
+    ]
+  }
+}

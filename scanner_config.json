@@ -5,11 +5,11 @@
     "max_price": 30,
     "min_volume_usd": 20000000,
     "premarket_min_volume_usd": 250000,
-    "history_period": "1mo",
+    "history_period": "10d",
     "symbol_files": [
       "penny_stock_universe.txt"
     ],
-    "max_symbols": 350,
+    "max_symbols": 120,
     "symbols": [
       "AMD",
       "ASTS",
@@ -48,7 +48,7 @@
     "coin_files": [
       "meme_coin_universe.txt"
     ],
-    "max_coins": 250,
+    "max_coins": 80,
     "coingecko_ids": [
       "dogecoin",
       "shiba-inu",

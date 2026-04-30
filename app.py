@@ -137,22 +137,20 @@ class AppHandler(BaseHTTPRequestHandler):
             meme_coins = []
 
             if market in ("all", "stocks"):
-                top_movers = scan_stocks(
-                    config,
-                    min_price=min_price,
-                    max_price=max_price,
-                    min_change_pct=min_change,
-                    top_movers_only=True,
-                    include_news=include_news,
-                )[:limit]
-                candidates = scan_stocks(
+                stock_signals = scan_stocks(
                     config,
                     min_price=min_price,
                     max_price=max_price,
                     min_change_pct=min_change,
                     top_movers_only=False,
                     include_news=include_news,
+                )
+                top_movers = sorted(
+                    (item for item in stock_signals if item.change_pct is not None and item.change_pct >= min_change),
+                    key=lambda item: item.score,
+                    reverse=True,
                 )[:limit]
+                candidates = stock_signals[:limit]
 
             if market in ("all", "crypto"):
                 meme_coins = scan_meme_coins(

@@ -2,7 +2,7 @@ const scanButton = document.querySelector("#scanButton");
 const premarketButton = document.querySelector("#premarketButton");
 const cryptoButton = document.querySelector("#cryptoButton");
 const statusEl = document.querySelector("#status");
-const REQUEST_TIMEOUT_MS = 60000;
+const REQUEST_TIMEOUT_MS = 120000;
 const signalsByKey = new Map();
 let activeSetup = null;
 

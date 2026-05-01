@@ -9,7 +9,7 @@
     "symbol_files": [
       "penny_stock_universe.txt"
     ],
-    "max_symbols": 120,
+    "max_symbols": 45,
     "symbols": [
       "AMD",
       "ASTS",
@@ -48,7 +48,7 @@
     "coin_files": [
       "meme_coin_universe.txt"
     ],
-    "max_coins": 80,
+    "max_coins": 40,
     "coingecko_ids": [
       "dogecoin",
       "shiba-inu",

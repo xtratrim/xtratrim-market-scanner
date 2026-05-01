@@ -313,7 +313,7 @@ def scan_premarket_stocks(
         prepost=True,
         progress=False,
         threads=True,
-        timeout=20,
+        timeout=10,
     )
     daily = yf.download(
         tickers=" ".join(symbols),
@@ -323,7 +323,7 @@ def scan_premarket_stocks(
         auto_adjust=False,
         progress=False,
         threads=True,
-        timeout=20,
+        timeout=10,
     )
 
     signals: list[Signal] = []
@@ -457,7 +457,7 @@ def scan_stocks(
         prepost=True,
         progress=False,
         threads=True,
-        timeout=20,
+        timeout=10,
     )
     data = yf.download(
         tickers=" ".join(symbols),
@@ -467,7 +467,7 @@ def scan_stocks(
         auto_adjust=False,
         progress=False,
         threads=True,
-        timeout=20,
+        timeout=10,
     )
 
     for symbol in symbols:

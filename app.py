@@ -129,6 +129,8 @@ class AppHandler(BaseHTTPRequestHandler):
         limit = as_int(params, "limit", 25)
         include_news = params.get("news", ["true"])[0].lower() == "true"
         extra_symbols = symbols_from_params(params)
+        if extra_symbols and max_price <= 30.0:
+            max_price = 1000.0
 
         try:
             config = with_extra_stock_symbols(load_config(DEFAULT_CONFIG), extra_symbols)

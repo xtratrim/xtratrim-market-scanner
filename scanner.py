@@ -317,12 +317,20 @@ def with_extra_stock_symbols(config: dict[str, Any], extra_symbols: Iterable[str
         return config
     updated = json.loads(json.dumps(config))
     current = updated.setdefault("stocks", {}).setdefault("symbols", [])
-    seen = {str(symbol).upper() for symbol in current}
+    preferred: list[str] = []
+    seen: set[str] = set()
     for symbol in extra_symbols:
         clean = str(symbol).strip().upper()
         if clean and clean not in seen:
-            current.append(clean)
+            preferred.append(clean)
             seen.add(clean)
+    for symbol in current:
+        clean = str(symbol).strip().upper()
+        if clean and clean not in seen:
+            preferred.append(clean)
+            seen.add(clean)
+    updated["stocks"]["symbols"] = preferred
+    updated["stocks"]["max_symbols"] = max(int(updated["stocks"].get("max_symbols", 0)), len(preferred))
     return updated
 
 

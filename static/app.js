@@ -134,6 +134,48 @@ function metric(label, value, tone = "") {
   return `<div class="metric ${tone}"><span>${label}</span><strong>${value}</strong></div>`;
 }
 
+function systemStep(label, value, tone = "") {
+  return `<div class="system-step ${tone}"><span>${label}</span><strong>${value}</strong></div>`;
+}
+
+function updateEntryExitSystem(entry, stop, target, rr) {
+  const systemEl = document.querySelector("#entryExitSystem");
+  if (!systemEl) return;
+
+  if (!activeSetup || !entry || !stop || !target || stop >= entry || target <= entry) {
+    systemEl.innerHTML = systemStep("Status", "Choose Plan, then set entry, stop, and target.", "warn");
+    return;
+  }
+
+  const grade = activeSetup.setup_grade || "C";
+  const tags = activeSetup.setup_tags || [];
+  const isHighQuality = ["A", "B"].includes(grade);
+  const hasVolume = tags.some((tag) => tag.includes("volume"));
+  const isThin = tags.some((tag) => tag.includes("thin liquidity"));
+  const isWideRisk = tags.some((tag) => tag.includes("wide-risk"));
+  const trimPrice = entry + (target - entry) * 0.55;
+  const timeStop = activeSetup.market === "pre_market" ? "10-15 min without follow-through" : "5-8 min after entry";
+  const trigger = activeSetup.market === "pre_market"
+    ? "Enter only on pullback hold, pre-market high reclaim, or clean higher-low break."
+    : "Enter only on opening range break, high-of-day reclaim, or volume-backed pullback hold.";
+  const skipReasons = [];
+
+  if (!isHighQuality) skipReasons.push("Pro Read is below B");
+  if (rr < 2) skipReasons.push("reward/risk under 2:1");
+  if (!hasVolume) skipReasons.push("no volume confirmation");
+  if (isThin) skipReasons.push("thin liquidity");
+  if (isWideRisk) skipReasons.push("range is too wide");
+
+  systemEl.innerHTML = [
+    systemStep("Enter", trigger, isHighQuality && hasVolume ? "good" : "warn"),
+    systemStep("Hard stop", `Leave at ${fmtMoney(stop)}. No averaging down.`, "bad"),
+    systemStep("First take-profit", `Trim some near ${fmtMoney(trimPrice)} or when move stalls.`, "good"),
+    systemStep("Final exit", `Leave the rest at ${fmtMoney(target)} or if price loses entry.`, "good"),
+    systemStep("Time stop", `Leave after ${timeStop}.`, "warn"),
+    systemStep("Skip if", skipReasons.length ? skipReasons.join("; ") : "Setup passes the basic system checks.", skipReasons.length ? "bad" : "good"),
+  ].join("");
+}
+
 function updatePlanLab() {
   const selectedEl = document.querySelector("#selectedSetup");
   const metricsEl = document.querySelector("#planMetrics");
@@ -143,6 +185,7 @@ function updatePlanLab() {
   if (!activeSetup) {
     metricsEl.innerHTML = metric("Status", "Waiting for setup");
     disciplineEl.textContent = "Checklist score: 0/5";
+    updateEntryExitSystem(0, 0, 0, 0);
     return;
   }
 
@@ -183,6 +226,7 @@ function updatePlanLab() {
 
   disciplineEl.textContent = `Checklist score: ${checkedRules}/5 | ${rr >= 2 ? "reward/risk is strong" : "tighten the plan before risking cash"}`;
   disciplineEl.className = `discipline-score ${setupTone}`;
+  updateEntryExitSystem(entry, stop, target, rr);
 }
 
 function updateSessionPlaybook() {

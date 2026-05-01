@@ -398,18 +398,53 @@ th {
   font-size: 20px;
 }
 
+.entry-exit-card {
+  grid-column: 1 / -1;
+}
+
+.system-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.system-step {
+  min-height: 92px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: #ffffff;
+}
+
+.system-step span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.system-step strong {
+  display: block;
+  margin-top: 8px;
+  line-height: 1.35;
+}
+
 .metric.good strong,
-.discipline-score.good {
+.discipline-score.good,
+.system-step.good strong {
   color: var(--good);
 }
 
 .metric.warn strong,
-.discipline-score.warn {
+.discipline-score.warn,
+.system-step.warn strong {
   color: var(--warn);
 }
 
 .metric.bad strong,
-.discipline-score.bad {
+.discipline-score.bad,
+.system-step.bad strong {
   color: var(--bad);
 }
 
@@ -500,7 +535,10 @@ th {
 
   .plan-layout,
   .plan-inputs,
-  .metric-grid {
+  .metric-grid,
+  .system-steps,
+  .session-layout,
+  .session-controls {
     grid-template-columns: 1fr;
   }
 }

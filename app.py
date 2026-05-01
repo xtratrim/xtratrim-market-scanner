@@ -10,6 +10,7 @@ import mimetypes
 import argparse
 import base64
 import os
+import requests
 from dataclasses import asdict
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -30,6 +31,7 @@ from scanner import (
 ROOT = Path(__file__).parent
 STATIC = ROOT / "static"
 AUTH_REALM = "Market Scanner"
+YAHOO_SCREENER_URL = "https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved"
 
 
 def as_float(params: dict[str, list[str]], key: str, default: float) -> float:
@@ -69,6 +71,9 @@ class AppHandler(BaseHTTPRequestHandler):
             return
         if parsed.path == "/api/crypto":
             self.serve_crypto(parsed.query)
+            return
+        if parsed.path == "/api/yahoo-gainers":
+            self.serve_yahoo_gainers(parsed.query)
             return
         if parsed.path.startswith("/static/"):
             self.serve_file(STATIC / parsed.path.removeprefix("/static/"))
@@ -119,6 +124,47 @@ class AppHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(content)))
         self.end_headers()
         self.wfile.write(content)
+
+    def serve_yahoo_gainers(self, query: str) -> None:
+        params = parse_qs(query)
+        limit = max(1, min(as_int(params, "limit", 25), 100))
+        try:
+            response = requests.get(
+                YAHOO_SCREENER_URL,
+                params={"scrIds": "day_gainers", "count": limit},
+                headers={"User-Agent": "Mozilla/5.0 market-scanner/1.0"},
+                timeout=20,
+            )
+            response.raise_for_status()
+            result = response.json().get("finance", {}).get("result", [{}])[0]
+            rows = []
+            for quote in result.get("quotes", []):
+                rows.append(
+                    {
+                        "symbol": quote.get("symbol"),
+                        "name": quote.get("longName") or quote.get("shortName") or quote.get("displayName"),
+                        "price": quote.get("regularMarketPrice"),
+                        "change": quote.get("regularMarketChange"),
+                        "change_pct": quote.get("regularMarketChangePercent"),
+                        "volume": quote.get("regularMarketVolume"),
+                        "avg_volume": quote.get("averageDailyVolume3Month"),
+                        "market_cap": quote.get("marketCap"),
+                        "pe_ratio": quote.get("trailingPE"),
+                        "fifty_two_week_change_pct": quote.get("fiftyTwoWeekChangePercent"),
+                        "fifty_two_week_range": quote.get("fiftyTwoWeekRange"),
+                    }
+                )
+            self.serve_json(
+                200,
+                {
+                    "gainers": rows,
+                    "count": len(rows),
+                    "source": "Yahoo Finance Day Gainers",
+                    "disclaimer": "Yahoo screener data can be delayed. Confirm price, spread, and news before trading.",
+                },
+            )
+        except Exception as exc:
+            self.serve_json(500, {"error": f"Yahoo gainers unavailable: {exc}"})
 
     def serve_scan(self, query: str) -> None:
         params = parse_qs(query)

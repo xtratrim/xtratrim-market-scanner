@@ -22,6 +22,7 @@
 
       <nav class="tabs" aria-label="Scanner sections">
         <button class="tab active" type="button" data-tab="stocksPanel">Stocks</button>
+        <button class="tab" type="button" data-tab="yahooPanel">Yahoo Top Gainers</button>
         <button class="tab" type="button" data-tab="premarketPanel">Pre-Market</button>
         <button class="tab" type="button" data-tab="cryptoPanel">Crypto / Meme Coins</button>
         <button class="tab" type="button" data-tab="planPanel">Plan Lab</button>
@@ -93,6 +94,16 @@
             <span>Price range + volume + trend + news</span>
           </div>
           <div id="candidates" class="table"></div>
+        </article>
+      </section>
+
+      <section class="grid tab-panel" id="yahooPanel">
+        <article>
+          <div class="section-title">
+            <h2>Yahoo Top Gainers</h2>
+            <span>Day gainers from Yahoo Finance screener</span>
+          </div>
+          <div id="yahooGainers" class="table"></div>
         </article>
       </section>
 

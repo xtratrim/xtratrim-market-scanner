@@ -22,6 +22,14 @@ const fmtPct = (value) => {
   return `<span class="${cls}">${sign}${Number(value).toFixed(2)}%</span>`;
 };
 
+const fmtNumber = (value) => {
+  if (value === null || value === undefined) return "n/a";
+  if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(2)}B`;
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(2)}M`;
+  if (value >= 1_000) return `${(value / 1_000).toFixed(0)}K`;
+  return Number(value).toLocaleString();
+};
+
 const escapeHtml = (value) =>
   String(value ?? "").replace(/[&<>"']/g, (char) => ({
     "&": "&amp;",
@@ -99,6 +107,46 @@ function tableRows(items, mode) {
           <th>Signals</th>
           <th>News</th>
           <th class="num">Plan</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function yahooRows(items) {
+  if (!items.length) {
+    return `<div class="empty">No Yahoo gainers returned yet.</div>`;
+  }
+  const rows = items.map((item) => `
+    <tr>
+      <td><strong>${escapeHtml(item.symbol)}</strong><br>${escapeHtml(item.name)}</td>
+      <td class="num">${fmtMoney(item.price)}</td>
+      <td class="num">${fmtMoney(item.change)}</td>
+      <td class="num">${fmtPct(item.change_pct)}</td>
+      <td class="num">${fmtNumber(item.volume)}</td>
+      <td class="num">${fmtNumber(item.avg_volume)}</td>
+      <td class="num">${fmtMoney(item.market_cap)}</td>
+      <td class="num">${item.pe_ratio ? Number(item.pe_ratio).toFixed(2) : "n/a"}</td>
+      <td class="num">${fmtPct(item.fifty_two_week_change_pct)}</td>
+      <td>${escapeHtml(item.fifty_two_week_range || "n/a")}</td>
+    </tr>
+  `).join("");
+
+  return `
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th class="num">Price</th>
+          <th class="num">Change</th>
+          <th class="num">Change %</th>
+          <th class="num">Volume</th>
+          <th class="num">Avg Vol (3M)</th>
+          <th class="num">Market Cap</th>
+          <th class="num">P/E</th>
+          <th class="num">52 Wk Change %</th>
+          <th>52 Wk Range</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
@@ -258,6 +306,10 @@ function updateSessionPlaybook() {
 }
 async function runScan() {
   const activePanel = document.querySelector(".tab-panel.active")?.id || "stocksPanel";
+  if (activePanel === "yahooPanel") {
+    await runYahooGainers();
+    return;
+  }
   if (activePanel === "premarketPanel") {
     await runPremarketScan();
     return;
@@ -285,6 +337,24 @@ async function runScan() {
     document.querySelector("#topMovers").innerHTML = tableRows(payload.top_movers, "movers");
     document.querySelector("#candidates").innerHTML = tableRows(payload.candidates, "candidates");
     statusEl.textContent = `Scanned ${payload.stock_universe_count ?? "configured"} stock symbols. ${payload.disclaimer}`;
+  } catch (error) {
+    statusEl.textContent = `Error: ${error.message}`;
+  } finally {
+    scanButton.disabled = false;
+  }
+}
+
+async function runYahooGainers() {
+  const params = new URLSearchParams({
+    limit: document.querySelector("#limit").value,
+  });
+
+  scanButton.disabled = true;
+  statusEl.textContent = "Loading Yahoo Finance top gainers...";
+  try {
+    const payload = await fetchJson(`/api/yahoo-gainers?${params.toString()}`);
+    document.querySelector("#yahooGainers").innerHTML = yahooRows(payload.gainers || []);
+    statusEl.textContent = `Loaded ${payload.count ?? 0} Yahoo top gainers. ${payload.disclaimer}`;
   } catch (error) {
     statusEl.textContent = `Error: ${error.message}`;
   } finally {
@@ -349,7 +419,8 @@ function activateTab(id) {
   const market = document.querySelector("#market");
   if (market && id === "stocksPanel") market.value = "stocks";
   if (market && id === "cryptoPanel") market.value = "crypto";
-  if (id === "premarketPanel") scanButton.textContent = "Scan Pre-Market";
+  if (id === "yahooPanel") scanButton.textContent = "Load Yahoo Gainers";
+  else if (id === "premarketPanel") scanButton.textContent = "Scan Pre-Market";
   else if (id === "cryptoPanel") scanButton.textContent = "Scan Crypto";
   else scanButton.textContent = "Scan Stocks";
 }

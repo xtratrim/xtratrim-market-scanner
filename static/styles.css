@@ -251,6 +251,57 @@ th {
   font-weight: 700;
 }
 
+.pro-read {
+  min-width: 190px;
+}
+
+.grade,
+.tag {
+  display: inline-block;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.grade {
+  min-width: 34px;
+  margin: 0 6px 6px 0;
+  padding: 4px 8px;
+  text-align: center;
+}
+
+.grade-a {
+  background: #dff3e5;
+  color: #075d43;
+}
+
+.grade-b {
+  background: #e9f0fb;
+  color: #244b78;
+}
+
+.grade-c {
+  background: #fff4d8;
+  color: #7a5600;
+}
+
+.grade-avoid {
+  background: #f7e2e2;
+  color: #8a2f2f;
+}
+
+.tag {
+  margin: 0 5px 5px 0;
+  padding: 4px 7px;
+  background: #eef1f5;
+  color: #394653;
+  font-size: 12px;
+}
+
+.muted-tag {
+  color: var(--muted);
+  font-weight: 700;
+}
+
 .notes {
   max-width: 320px;
   color: var(--muted);

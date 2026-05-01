@@ -57,6 +57,10 @@ function tableRows(items, mode) {
   const includePrediction = mode !== "movers";
   const rows = items.map((item, index) => {
     const planKey = `${mode}:${index}:${item.symbol}`;
+    const grade = item.setup_grade || "C";
+    const tags = (item.setup_tags || [])
+      .map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`)
+      .join("");
     const headlines = (item.headlines || [])
       .slice(0, 2)
       .map((headline) => `<a href="${escapeHtml(headline.link)}" target="_blank" rel="noreferrer">${escapeHtml(headline.title)}</a>`)
@@ -71,6 +75,7 @@ function tableRows(items, mode) {
         <td class="num">${item.volume_ratio ? `${Number(item.volume_ratio).toFixed(2)}x` : "n/a"}</td>
         <td class="num">${fmtPct(item.volatility_pct)}</td>
         ${includePrediction ? `<td class="num"><span class="score">${item.prediction_score ?? "n/a"}</span></td>` : ""}
+        <td class="pro-read"><span class="grade grade-${escapeHtml(grade).toLowerCase()}">${escapeHtml(grade)}</span>${tags || `<span class="tag muted-tag">needs confirmation</span>`}</td>
         <td class="notes">${escapeHtml((item.notes || []).join(", "))}</td>
         <td class="news">${headlines || "n/a"}</td>
         <td class="num"><button class="plan-btn" type="button" data-plan-key="${escapeHtml(planKey)}">Plan</button></td>
@@ -90,6 +95,7 @@ function tableRows(items, mode) {
           <th class="num">Vol Ratio</th>
           <th class="num">Volatility</th>
           ${includePrediction ? `<th class="num">Score</th>` : ""}
+          <th>Pro Read</th>
           <th>Signals</th>
           <th>News</th>
           <th class="num">Plan</th>

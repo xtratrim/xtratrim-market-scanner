@@ -47,6 +47,8 @@ class Signal:
     prediction_score: float | None = None
     news_score: float | None = None
     headlines: list[dict[str, str]] | None = None
+    setup_grade: str | None = None
+    setup_tags: list[str] | None = None
 
 
 def load_config(path: Path) -> dict[str, Any]:
@@ -162,6 +164,66 @@ def score_signal(
             score += 5
 
     return round(score, 2), notes
+
+
+def pro_setup_read(
+    *,
+    change_pct: float | None,
+    volume_usd: float | None,
+    volume_ratio: float | None,
+    volatility_pct: float | None,
+    news_score: float | None,
+    min_volume_usd: float,
+) -> tuple[str, list[str]]:
+    tags: list[str] = []
+    points = 0
+
+    if change_pct is not None:
+        if change_pct >= 20:
+            tags.append("momentum burst")
+            points += 2
+        elif change_pct >= 8:
+            tags.append("mover")
+            points += 1
+
+    if volume_ratio is not None:
+        if volume_ratio >= 3:
+            tags.append("relative volume surge")
+            points += 3
+        elif volume_ratio >= 1.5:
+            tags.append("unusual volume")
+            points += 2
+
+    if volume_usd is not None:
+        if volume_usd >= min_volume_usd:
+            tags.append("liquid enough")
+            points += 2
+        elif volume_usd < min_volume_usd * 0.25:
+            tags.append("thin liquidity")
+            points -= 2
+
+    if volatility_pct is not None:
+        if volatility_pct >= 25:
+            tags.append("wide-risk tape")
+            points -= 2
+        elif volatility_pct <= 12:
+            tags.append("controlled range")
+            points += 1
+
+    if news_score is not None and news_score > 0:
+        tags.append("catalyst watch")
+        points += 1
+
+    if points >= 7:
+        grade = "A"
+    elif points >= 4:
+        grade = "B"
+    elif points >= 1:
+        grade = "C"
+    else:
+        grade = "Avoid"
+
+    return grade, tags[:5]
 
 
 def score_news_headlines(headlines: list[dict[str, str]]) -> tuple[float, list[str]]:
@@ -403,6 +465,14 @@ def scan_premarket_stocks(
             news_score,
             min_volume_usd,
         )
+        setup_grade, setup_tags = pro_setup_read(
+            change_pct=change,
+            volume_usd=volume_usd,
+            volume_ratio=volume_ratio,
+            volatility_pct=volatility,
+            news_score=news_score,
+            min_volume_usd=min_volume_usd,
+        )
 
         signals.append(
             Signal(
@@ -420,6 +490,8 @@ def scan_premarket_stocks(
                 prediction_score=prediction_score,
                 news_score=news_score,
                 headlines=headlines,
+                setup_grade=setup_grade,
+                setup_tags=setup_tags,
             )
         )
 
@@ -538,6 +610,14 @@ def scan_stocks(
         )
         if volume_ratio is not None and volume_ratio >= 1.5:
             notes.append("unusual volume")
+        setup_grade, setup_tags = pro_setup_read(
+            change_pct=change,
+            volume_usd=volume_usd,
+            volume_ratio=volume_ratio,
+            volatility_pct=volatility,
+            news_score=news_score,
+            min_volume_usd=min_volume_usd,
+        )
 
         if not top_movers_only or (change is not None and change >= min_change_pct):
             signals.append(
@@ -556,6 +636,8 @@ def scan_stocks(
                     prediction_score=prediction_score,
                     news_score=news_score,
                     headlines=headlines,
+                    setup_grade=setup_grade,
+                    setup_tags=setup_tags,
                 )
             )
 
@@ -643,6 +725,14 @@ def scan_meme_coins(
             )
 
             score, notes = score_signal(change, volume_usd, trend, volatility, min_volume_usd)
+            setup_grade, setup_tags = pro_setup_read(
+                change_pct=change,
+                volume_usd=volume_usd,
+                volume_ratio=None,
+                volatility_pct=volatility,
+                news_score=None,
+                min_volume_usd=min_volume_usd,
+            )
             if change is not None and change >= min_change_pct:
                 signals.append(
                     Signal(
@@ -657,6 +747,8 @@ def scan_meme_coins(
                     score=score,
                     notes=notes,
                     prediction_score=score,
+                    setup_grade=setup_grade,
+                    setup_tags=setup_tags,
                 )
             )
 
